@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+extern NSString *const ADSInconsistencyException;
+
 @interface ADSDoublyLinkedList : NSObject
 
 /* Access Nodes */
@@ -46,7 +48,17 @@
 ///Trim both forwards and backwards leaving only the object at `index` e.g. NULL<->index<->NULL
 - (void)trimAll;
 
-///Remov all objects
+///Remove all objects
 - (void)empty;
+
+@end
+
+@interface ADSDoublyLinkedList (Extended)
+
+/** Jump the index to anObject if it exists otherwise no changes are made
+    @param anObject: the object to search for and move index to
+    @return YES for successful jump, NO if anObject was not found
+ */
+- (BOOL)jump:(id)anObject;
 
 @end
