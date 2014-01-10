@@ -11,6 +11,10 @@
 extern NSString *const ADSInconsistencyException;
 
 @interface ADSDoublyLinkedList : NSObject
+{
+    @protected
+    id _internal;
+}
 
 /* Access Nodes */
 
@@ -51,6 +55,9 @@ extern NSString *const ADSInconsistencyException;
 ///Remove all objects
 - (void)empty;
 
+///List is empty
+- (BOOL)isEmpty;
+
 @end
 
 @interface ADSDoublyLinkedList (Extended)
@@ -60,5 +67,17 @@ extern NSString *const ADSInconsistencyException;
     @return YES for successful jump, NO if anObject was not found
  */
 - (BOOL)jump:(id)anObject;
+
+///swaps objects and maintains the links. if secondObject is not already in the list firstObject is removed.
+- (void)swapObject:(id)firstObject withObject:(id)secondObject;
+
+@end
+
+/* ADSLink */
+
+@interface ADSLink : NSObject
+
+@property (strong, nonatomic) id forward; //if NULL we are the head
+@property (strong, nonatomic) id back; //if NULL we are the tail
 
 @end

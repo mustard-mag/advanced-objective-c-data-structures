@@ -10,10 +10,7 @@
 
 NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 
-@interface ADSLink : NSObject /*<NSCopying>*/
-
-@property (strong, nonatomic) id forward; //if NULL we are the head
-@property (strong, nonatomic) id back; //if NULL we are the tail
+@interface ADSLink ()
 
 + (instancetype)linkForward:(id)myForward backward:(id)myBackward;
 
@@ -26,11 +23,6 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     self.forward = nil;
     self.back = nil;
 }
-
-//- (id)copyWithZone:(NSZone *)zone
-//{
-//    return [ADSLink linkForward:self.forward backward:self.back];
-//}
 
 + (instancetype)linkForward:(id)myForward backward:(id)myBackward
 {
@@ -46,7 +38,16 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 
 @implementation ADSDoublyLinkedList
 {
-    NSMapTable *_list;
+    __weak NSMapTable *_list;
+}
+
+- (void)dealloc
+{
+    [_list removeAllObjects];
+    _list = nil;
+    _internal = nil;
+    
+    NSLog(@"BUY, BUY!");
 }
 
 - (instancetype)init
@@ -55,8 +56,9 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     
     if(self)
     {
-        _list = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory
-                                      valueOptions:NSPointerFunctionsStrongMemory/*weak?*/];
+        _internal = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory
+                                          valueOptions:NSPointerFunctionsStrongMemory/*weak?*/];
+        _list = _internal;
     }
     
     return self;
@@ -278,7 +280,32 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
  */
 - (BOOL)jump:(id)anObject
 {
-    return NO;
+    BOOL success = NO;
+    
+    ADSLink *indexLink = [_list objectForKey:anObject];
+    
+    if(indexLink)
+    {
+        success = YES;
+        _index = anObject;
+    }
+    
+    return success;
+}
+
+- (void)jumpToHead
+{
+    [self jump:self.head];
+}
+
+- (void)jumpToTail
+{
+    [self jump:self.tail];
+}
+
+- (void)swapObject:(id)firstObject withObject:(id)secondObject
+{
+#error here
 }
 
 @end
