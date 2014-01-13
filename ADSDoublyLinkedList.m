@@ -20,6 +20,8 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 
 - (void)dealloc
 {
+    NSLog(@"Link is being removed...");
+    
     self.forward = nil;
     self.back = nil;
 }
@@ -34,11 +36,17 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     return me;
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<-[%p]   [%p]->", self.back, self.forward];
+}
+
 @end
 
 @implementation ADSDoublyLinkedList
 {
     __weak NSMapTable *_list;
+    NSMutableSet *_listContents;
 }
 
 - (void)dealloc
@@ -46,6 +54,9 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     [_list removeAllObjects];
     _list = nil;
     _internal = nil;
+    
+    [_listContents removeAllObjects];
+    _listContents = nil;
     
     NSLog(@"BUY, BUY!");
 }
@@ -56,6 +67,8 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     
     if(self)
     {
+        _listContents = [NSMutableSet setWithCapacity:1];
+        
         _internal = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory
                                           valueOptions:NSPointerFunctionsStrongMemory/*weak?*/];
         _list = _internal;
@@ -144,6 +157,13 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 ///Add an object to the list. This object will be connected to head.
 - (void)add:(id)anObject
 {
+    NSAssert(![_listContents containsObject:anObject], @"Linked lists can only contain one copy of each object");
+    
+    if([_listContents containsObject:anObject])
+        return;
+    
+    [_listContents addObject:anObject];
+    
     ADSLink *headLink = [_list objectForKey:self.head];
     
     if(headLink)
@@ -207,6 +227,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     }
     
     NSLog(@"REMOVING: %p", nodeToRemove);
+    [_listContents removeObject:nodeToRemove];
     [_list removeObjectForKey:nodeToRemove];
 }
 
@@ -224,6 +245,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
         ADSLink *objLink = [_list objectForKey:trimFromObject];
         
         NSLog(@"REMOVING: %p", trimFromObject);
+        [_listContents removeObject:trimFromObject];
         [_list removeObjectForKey:trimFromObject];
         
         trimFromObject = objLink.forward;
@@ -247,6 +269,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
         ADSLink *objLink = [_list objectForKey:trimFromObject];
         
         NSLog(@"REMOVING: %p", trimFromObject);
+        [_listContents removeObject:trimFromObject];
         [_list removeObjectForKey:trimFromObject];
         
         trimFromObject = objLink.back;
@@ -267,6 +290,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 - (void)empty
 {
     [_list removeAllObjects];
+    [_listContents removeAllObjects];
     _index = _tail = _head = nil;
 }
 
@@ -305,7 +329,91 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 
 - (void)swapObject:(id)firstObject withObject:(id)secondObject
 {
-#error here
+    ADSLink *firstLink = [_list objectForKey:firstObject];
+    ADSLink *secondLink = [_list objectForKey:secondObject];
+    
+    if(firstLink && secondLink)
+    {
+        [_list removeObjectForKey:firstObject];
+        [_list removeObjectForKey:secondObject];
+        
+        { //Update the links for the newly added secondObject
+            
+            ADSLink *backLink = [_list objectForKey:firstLink.back];
+            backLink.forward = secondObject;
+            
+            ADSLink *forwardLink = [_list objectForKey:firstLink.forward];
+            forwardLink.back = secondObject;
+            
+            if(!forwardLink)
+                _head = secondObject;
+            
+            if(!backLink)
+                _tail = secondObject;
+            
+            [_list setObject:firstLink forKey:secondObject];
+        }
+        
+        { //Update the links for the newly added firstObject
+            
+            ADSLink *backLink = [_list objectForKey:secondLink.back];
+            backLink.forward = firstObject;
+        
+            ADSLink *forwardLink = [_list objectForKey:secondLink.forward];
+            forwardLink.back = firstObject;
+            
+            if(!forwardLink)
+                _head = firstObject;
+            
+            if(!backLink)
+                _tail = firstObject;
+            
+            [_list setObject:secondLink forKey:firstObject];
+        }
+    }
+    else if(firstLink) //TODO: refactor these with less code dupe.
+    {
+        [_list removeObjectForKey:firstObject];
+        
+        { //Update the links for the newly added secondObject
+            
+            ADSLink *backLink = [_list objectForKey:firstLink.back];
+            backLink.forward = secondObject;
+            
+            ADSLink *forwardLink = [_list objectForKey:firstLink.forward];
+            forwardLink.back = secondObject;
+            
+            if(!forwardLink)
+                _head = secondObject;
+            
+            if(!backLink)
+                _tail = secondObject;
+            
+            [_list setObject:firstLink forKey:secondObject];
+        }
+    }
+    else if(secondLink)
+    {
+        [_list removeObjectForKey:secondObject];
+        
+        { //Update the links for the newly added firstObject
+            
+            ADSLink *backLink = [_list objectForKey:secondLink.back];
+            backLink.forward = firstObject;
+            
+            ADSLink *forwardLink = [_list objectForKey:secondLink.forward];
+            forwardLink.back = firstObject;
+            
+            if(!forwardLink)
+                _head = firstObject;
+            
+            if(!backLink)
+                _tail = firstObject;
+            
+            [_list setObject:secondLink forKey:firstObject];
+        }
+    }
+    //else if(!(firstLink && secondLink)) //neither object is in list
 }
 
 @end
