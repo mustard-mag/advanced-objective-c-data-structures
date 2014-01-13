@@ -22,6 +22,14 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 @implementation ADSCache
 
+- (void)dealloc
+{
+    NSLog(@"Deleating cache file: %@", self.data);
+    
+    [[NSFileManager defaultManager] removeItemAtPath:[[ADSCache cachePath] stringByAppendingPathComponent:self.data]
+                                               error:nil];
+}
+
 + (instancetype)cacheWithObject:(id<NSCoding>)anObject
 {
     ADSCache *me = [[ADSCache alloc] init];
@@ -38,7 +46,14 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (id)object
 {
-    return [NSKeyedUnarchiver unarchiveObjectWithFile:[[ADSCache cachePath] stringByAppendingPathComponent:self.data]];
+    id theObj = [NSKeyedUnarchiver unarchiveObjectWithFile:[[ADSCache cachePath] stringByAppendingPathComponent:self.data]];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        [[NSFileManager defaultManager] removeItemAtPath:[[ADSCache cachePath] stringByAppendingPathComponent:self.data]
+                                                   error:nil];
+    });
+    
+    return theObj;
 }
 
 + (NSString *)cachePath

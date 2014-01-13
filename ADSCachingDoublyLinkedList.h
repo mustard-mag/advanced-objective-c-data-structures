@@ -12,14 +12,6 @@
 
 - (instancetype)initWithCacheWindow:(NSInteger)cacheWindow;
 
-- (void)trimForward __attribute__((unavailable("Not implemented in ADSCachingDoublyLinkedList")));
-
-- (void)trimBackward __attribute__((unavailable("Not implemented in ADSCachingDoublyLinkedList")));
-
-- (void)trimAll __attribute__((unavailable("Not implemented in ADSCachingDoublyLinkedList")));
-
-- (void)empty __attribute__((unavailable("Not implemented in ADSCachingDoublyLinkedList")));
-
 - (BOOL)jump:(id)anObject __attribute__((unavailable("Not implemented in ADSCachingDoublyLinkedList")));
 
 @end
