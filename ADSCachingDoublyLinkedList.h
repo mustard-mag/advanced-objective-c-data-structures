@@ -20,4 +20,6 @@
 
 - (void)empty __attribute__((unavailable("Not implemented in ADSCachingDoublyLinkedList")));
 
+- (BOOL)jump:(id)anObject __attribute__((unavailable("Not implemented in ADSCachingDoublyLinkedList")));
+
 @end
