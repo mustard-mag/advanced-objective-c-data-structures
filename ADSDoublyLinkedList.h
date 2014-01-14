@@ -62,6 +62,15 @@ extern NSString *const ADSInconsistencyException;
 
 @interface ADSDoublyLinkedList (Extended)
 
+///Add an object by inserting it between existingObject and existingObject->back
+- (void)add:(id)anObject before:(id)existingObject;
+
+///Add an object by inserting it between existingObject and existingObject->forward
+- (void)add:(id)anObject after:(id)existingObject;
+
+///Add an object at the tail of the list
+- (void)addAtTail:(id)anObject;
+
 /** Jump the index to anObject if it exists otherwise no changes are made
     @param anObject: the object to search for and move index to
     @return YES for successful jump, NO if anObject was not found

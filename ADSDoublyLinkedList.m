@@ -462,4 +462,19 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     return objLink.back;
 }
 
+- (void)add:(id)anObject before:(id)existingObject
+{
+    
+}
+
+- (void)add:(id)anObject after:(id)existingObject
+{
+    
+}
+
+- (void)addAtTail:(id)anObject
+{
+    
+}
+
 @end
