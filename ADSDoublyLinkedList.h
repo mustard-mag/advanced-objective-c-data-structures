@@ -71,6 +71,12 @@ extern NSString *const ADSInconsistencyException;
 ///swaps objects and maintains the links. if secondObject is not already in the list firstObject is removed.
 - (void)swapObject:(id)firstObject withObject:(id)secondObject;
 
+///Convenience method to return the next object in the list and advance the index. If the index is at head this will return nil and not change index.
+- (id)nextObject;
+
+///Convenience method to return the previous object in the list and move the index back in the list. If the index is at tail this will return nil and not change index.
+- (id)previousObject;
+
 @end
 
 /* ADSLink */

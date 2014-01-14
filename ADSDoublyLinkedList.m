@@ -416,4 +416,36 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     //else if(!(firstLink && secondLink)) //neither object is in list
 }
 
+- (id)nextObject
+{
+    @synchronized(self)
+    {
+        if([self.index isEqual:self.head])
+        {
+            return nil;
+        }
+        else
+        {
+            [self forward];
+            return self.index;
+        }
+    }
+}
+
+- (id)previousObject
+{
+    @synchronized(self)
+    {
+        if([self.index isEqual:self.tail])
+        {
+            return nil;
+        }
+        else
+        {
+            [self backward];
+            return self.index;
+        }
+    }
+}
+
 @end
