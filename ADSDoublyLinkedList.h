@@ -14,6 +14,8 @@ extern NSString *const ADSInconsistencyException;
 {
     @protected
     id _internal;
+    id _head;
+    id _tail;
 }
 
 /* Access Nodes */

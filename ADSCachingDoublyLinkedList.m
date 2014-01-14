@@ -122,7 +122,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     if([self.head isEqual:self.tail])
         return @"[ ONLY ONE OBJECT ]";
     
-    NSMutableString *desc = [NSMutableString stringWithFormat:@"[%@T%@]", ([self.tail isEqual:self.index]?@"*":@" "), ([self.tail isKindOfClass:[ADSCache class]]?@"~":@" ")];
+    NSMutableString *desc = [NSMutableString stringWithFormat:@"[%@T|%lu%@]", ([self.tail isEqual:self.index]?@"*":@" "), (unsigned long)([self.tail isKindOfClass:[ADSCache class]]?[self.tail objectHash]:[self.tail hash]), ([self.tail isKindOfClass:[ADSCache class]]?@"~":@" ")];
     
     ADSLink *iterate = [_list objectForKey:self.tail];
     
@@ -132,39 +132,13 @@ const NSInteger ADSDefaultCacheWindow = 4;
         iterate = [_list objectForKey:current];
         
         if(iterate.forward)
-            [desc appendFormat:@"[%@O%@]", ([current isEqual:self.index]?@"*":@" "), ([current isKindOfClass:[ADSCache class]]?@"~":@" ")];
+            [desc appendFormat:@"[%@O|%lu%@]", ([current isEqual:self.index]?@"*":@" "), (unsigned long)([current isKindOfClass:[ADSCache class]]?[current objectHash]:[current hash]), ([current isKindOfClass:[ADSCache class]]?@"~":@" ")];
         
     } while (iterate.forward);
     
-    [desc appendFormat:@"[%@H%@]", ([self.head isEqual:self.index]?@"*":@" "), ([self.head isKindOfClass:[ADSCache class]]?@"~":@" ")];
-    
-    //[desc appendFormat:@"\n\n[INDEX: %p]", self.index];
-    
+    [desc appendFormat:@"[%@H|%lu%@]", ([self.head isEqual:self.index]?@"*":@" "), (unsigned long)([self.head isKindOfClass:[ADSCache class]]?[self.head objectHash]:[self.head hash]), ([self.head isKindOfClass:[ADSCache class]]?@"~":@" ")];
+        
     return desc;
-    
-    
-//    if([self isEmpty])
-//        return @"[   EMPTY LIST    ]";
-//    
-//    NSMutableString *desc = [NSMutableString stringWithFormat:@"[TAIL:  %p%@%@]<->", self.tail, ([self.tail isEqual:self.index]?@" :INDEX":@""), ([self.tail isKindOfClass:[ADSCache class]]?@"*":@"")];
-//    
-//    ADSLink *iterate = [_list objectForKey:self.tail];
-//    
-//    do
-//    {
-//        id current = iterate.forward;
-//        iterate = [_list objectForKey:current];
-//        
-//        if(iterate.forward)
-//            [desc appendFormat:@"[%@%p%@]<->", ([current isEqual:self.index]?@"INDEX: ":@""), current, ([current isKindOfClass:[ADSCache class]]?@"*":@"")];
-//        
-//    } while (iterate.forward);
-//    
-//    [desc appendFormat:@"[%@%p%@  :HEAD]", ([self.head isEqual:self.index]?@"INDEX: ":@""), self.head, ([self.head isKindOfClass:[ADSCache class]]?@"*":@"")];
-//    
-//    [desc appendFormat:@"\n\n[INDEX: %p]", self.index];
-//    
-//    return desc;
 }
 
 //- (void)adjustCacheWindow
@@ -283,10 +257,15 @@ const NSInteger ADSDefaultCacheWindow = 4;
     return count;
 }
 
-- (ADSCache *)mutateObjectToCache:(id)anObject
+- (id)mutateObjectToCache:(id)anObject
 {
     ADSCache *cache = nil;
     
+    /*if([anObject isEqual:self.head] || [anObject isEqual:self.tail])
+    {
+        return anObject; //do not cach head or tail
+    }
+    else*/
     if(![anObject isKindOfClass:[ADSCache class]])
     {
         //TODO: refactor into block
@@ -364,6 +343,36 @@ const NSInteger ADSDefaultCacheWindow = 4;
 }
 
 #pragma mark - Overridden
+
+//- (id)head
+//{
+//    id realHead = [super head];
+//    
+//    if([realHead isKindOfClass:[ADSCache class]])
+//    {
+//        id uncachedHead = [self mutateCacheToObject:realHead];
+//        _head = uncachedHead;
+//    }
+//    
+//    NSAssert(![_head isKindOfClass:[ADSCache class]], @"ADSCache are not valid head object objects");
+//
+//    return _head;
+//}
+//
+//- (id)tail
+//{
+//    id realTail = [super tail];
+//    
+//    if([realTail isKindOfClass:[ADSCache class]])
+//    {
+//        id uncachedTail = [self mutateCacheToObject:realTail];
+//        _head = uncachedTail;
+//    }
+//    
+//    NSAssert(![_tail isKindOfClass:[ADSCache class]], @"ADSCache are not valid head object objects");
+//    
+//    return _tail;
+//}
 
 - (void)add:(id)anObject
 {
@@ -549,6 +558,24 @@ const NSInteger ADSDefaultCacheWindow = 4;
     }
     
     return prevObj;
+}
+
+- (void)add:(id)anObject before:(id)existingObject
+{
+    NSAssert(![existingObject isKindOfClass:[ADSCache class]], @"ADSCache are not valid objects");
+    
+    id existingObjectCache = [_serialisedObjectLookup objectForKey:@([existingObject hash])];
+    
+    [super add:anObject before:existingObjectCache?existingObjectCache:existingObject];
+}
+
+- (void)add:(id)anObject after:(id)existingObject
+{
+    NSAssert(![existingObject isKindOfClass:[ADSCache class]], @"ADSCache are not valid objects");
+
+    id existingObjectCache = [_serialisedObjectLookup objectForKey:@([existingObject hash])];
+    
+    [super add:anObject after:existingObjectCache?existingObjectCache:existingObject];
 }
 
 @end

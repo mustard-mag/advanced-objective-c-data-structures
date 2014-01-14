@@ -38,7 +38,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<-[%p]   [%p]->", self.back, self.forward];
+    return [NSString stringWithFormat:@"\t\t◀[%@]---[%@]▶", self.back, self.forward];
 }
 
 @end
@@ -98,7 +98,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
         
     } while (iterate.forward);
     
-    [desc appendFormat:@"[%@%p  :HEAD]", ([self.head isEqual:self.index]?@"INDEX: ":@""), self.head];
+    [desc appendFormat:@"[%@%p  :HEAD]", ([_head isEqual:self.index]?@"INDEX: ":@""), _head];
     
     [desc appendFormat:@"\n\n[INDEX: %p]", self.index];
     
@@ -164,13 +164,13 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     
     [_listContents addObject:anObject];
     
-    ADSLink *headLink = [_list objectForKey:self.head];
+    ADSLink *headLink = [_list objectForKey:_head];
     
     if(headLink)
     {
         headLink.forward = anObject; //set new object as the forward link
         
-        ADSLink *objectLink = [ADSLink linkForward:NULL backward:self.head];
+        ADSLink *objectLink = [ADSLink linkForward:NULL backward:_head];
         
         [_list setObject:objectLink forKey:anObject];
         
@@ -464,17 +464,81 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 
 - (void)add:(id)anObject before:(id)existingObject
 {
+    NSAssert(![_listContents containsObject:anObject], @"Linked lists can only contain one copy of each object");
     
+    if([_listContents containsObject:anObject])
+        return;
+    
+    [_listContents addObject:anObject];
+    
+    if([existingObject isEqual:self.tail])
+    {
+        [self addAtTail:anObject];
+    }
+    else
+    {
+        ADSLink *existingLink = [_list objectForKey:existingObject];
+        id backObject = existingLink.back;
+        ADSLink *beforeLink = [_list objectForKey:backObject];
+        
+        NSAssert((existingLink && beforeLink), @"List is corrupt!");
+        
+        existingLink.back = anObject;
+        beforeLink.forward = anObject;
+        
+        ADSLink *newLink = [ADSLink linkForward:existingObject backward:backObject];
+        [_list setObject:newLink forKey:anObject];
+    }
 }
 
 - (void)add:(id)anObject after:(id)existingObject
 {
+    NSAssert(![_listContents containsObject:anObject], @"Linked lists can only contain one copy of each object");
     
+    if([existingObject isEqual:self.head])
+    {
+        [self add:anObject]; //this will add object to _listContents
+    }
+    else
+    {
+        if([_listContents containsObject:anObject])
+            return;
+        
+        [_listContents addObject:anObject];
+        
+        ADSLink *existingLink = [_list objectForKey:existingObject];
+        id forwardObject = existingLink.forward;
+        ADSLink *afterLink = [_list objectForKey:forwardObject];
+        
+        NSAssert((existingLink && afterLink), @"List is corrupt!");
+        
+        existingLink.forward = anObject;
+        afterLink.back = anObject;
+        
+        ADSLink *newLink = [ADSLink linkForward:forwardObject backward:existingObject];
+        [_list setObject:newLink forKey:anObject];
+    }
 }
 
 - (void)addAtTail:(id)anObject
 {
+    NSAssert(![_listContents containsObject:anObject], @"Linked lists can only contain one copy of each object");
     
+    if([_listContents containsObject:anObject])
+        return;
+    
+    [_listContents addObject:anObject];
+    
+    ADSLink *tailLink = [_list objectForKey:_tail];
+    
+    NSAssert(!tailLink.back, @"Tail is corrupt!");
+    
+    ADSLink *newLink = [ADSLink linkForward:self.tail backward:nil];
+    
+    tailLink.back = anObject;
+    _tail = anObject;
+    
+    [_list setObject:newLink forKey:anObject];
 }
 
 @end
