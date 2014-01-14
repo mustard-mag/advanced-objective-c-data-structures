@@ -33,6 +33,8 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 + (instancetype)cacheWithObject:(id<NSCoding, NSObject>)anObject
 {
+    NSParameterAssert(anObject);
+    
     ADSCache *me = [[ADSCache alloc] init];
     
     me.data = [[NSUUID UUID] UUIDString];
@@ -259,6 +261,9 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (id)mutateObjectToCache:(id)anObject
 {
+    NSParameterAssert(anObject);
+    NSAssert(![anObject isKindOfClass:[ADSCache class]], @"Cannot cache ADSCache objects.");
+    
     ADSCache *cache = nil;
     
     /*if([anObject isEqual:self.head] || [anObject isEqual:self.tail])
@@ -274,8 +279,17 @@ const NSInteger ADSDefaultCacheWindow = 4;
         if(cache)
         {
             [_serialisedObjectLookup setObject:cache forKey:@(cache.objectHash)];
-            [self swapObject:anObject withObject:cache];
+            [self swapObject:anObject withObject:cache]; //maintains head and tail???
         }
+        
+//        if([anObject isEqual:_tail])
+//        {
+//            _tail = cache;
+//        }
+//        else if ([anObject isEqual:_head])
+//        {
+//            _head = cache;
+//        }
     }
     
     return cache;
@@ -342,37 +356,41 @@ const NSInteger ADSDefaultCacheWindow = 4;
     return returnObj;
 }
 
-#pragma mark - Overridden
+- (void)serialiseToObject:(id)anObject //from tail
+{
+    id currentObj = self.tail;
+    
+    do {
+        
+        if(![currentObj isKindOfClass:[ADSCache class]])
+        {
+            currentObj = [self mutateObjectToCache:currentObj];
+        }
+        
+        ADSLink *link = [_list objectForKey:currentObj];
+        currentObj = link.forward;
+        
+    } while (![currentObj isEqual:anObject]);
+}
 
-//- (id)head
-//{
-//    id realHead = [super head];
-//    
-//    if([realHead isKindOfClass:[ADSCache class]])
-//    {
-//        id uncachedHead = [self mutateCacheToObject:realHead];
-//        _head = uncachedHead;
-//    }
-//    
-//    NSAssert(![_head isKindOfClass:[ADSCache class]], @"ADSCache are not valid head object objects");
-//
-//    return _head;
-//}
-//
-//- (id)tail
-//{
-//    id realTail = [super tail];
-//    
-//    if([realTail isKindOfClass:[ADSCache class]])
-//    {
-//        id uncachedTail = [self mutateCacheToObject:realTail];
-//        _head = uncachedTail;
-//    }
-//    
-//    NSAssert(![_tail isKindOfClass:[ADSCache class]], @"ADSCache are not valid head object objects");
-//    
-//    return _tail;
-//}
+- (void)serialiseFromObject:(id)anObject //to head
+{
+    id currentObj = anObject;
+    
+    do {
+        
+        if(![currentObj isKindOfClass:[ADSCache class]])
+        {
+            currentObj = [self mutateObjectToCache:currentObj];
+        }
+        
+        ADSLink *link = [_list objectForKey:currentObj];
+        currentObj = link.forward;
+        
+    } while (currentObj);
+}
+
+#pragma mark - Overridden
 
 - (void)add:(id)anObject
 {
@@ -488,41 +506,6 @@ const NSInteger ADSDefaultCacheWindow = 4;
         }
     }
     
-//    id backObj = [self objectAtDistance:-_cacheWindow fromObject:self.index];
-//    BOOL loopBack = ![self.index isEqual:self.tail]; //only try and cache backwards if we're not the tail
-//    
-//    while(loopBack)
-//    {
-//        if(backObj && ![backObj isKindOfClass:[ADSCache class]])
-//        {
-//            id obj = [self mutateCacheToObject:backObj];
-//            
-//            backObj = [self objectAtDistance:-1 fromObject:obj];
-//        }
-//        else
-//        {
-//            loopBack = NO;
-//        }
-//    }
-//    
-//    //Hop forward _cacheWindow times and un-cache objects if required
-//    id forwardObj = [self objectAtDistance:_cacheWindow fromObject:self.index];
-//    BOOL loopForward = ![self.index isEqual:self.head]; //only try and cache forwards if we're not the head
-//    
-//    while(loopForward && forwardObj)
-//    {
-//        if([forwardObj isKindOfClass:[ADSCache class]])
-//        {
-//            ADSCache *cache = [self mutateObjectToCache:forwardObj];
-//            
-//            forwardObj = [self objectAtDistance:-1 fromObject:cache];
-//        }
-//        else
-//        {
-//            loopForward = NO;
-//        }
-//    }
-    
     NSAssert(![self.index isKindOfClass:[ADSCache class]], @"Index cannot be of type ADSCache");
 }
 
@@ -567,15 +550,23 @@ const NSInteger ADSDefaultCacheWindow = 4;
     id existingObjectCache = [_serialisedObjectLookup objectForKey:@([existingObject hash])];
     
     [super add:anObject before:existingObjectCache?existingObjectCache:existingObject];
+    
+    [self serialiseToObject:[self objectAtDistance:-_cacheWindow fromObject:self.index]];
+    [self serialiseFromObject:[self objectAtDistance:_cacheWindow fromObject:self.index]];
 }
 
 - (void)add:(id)anObject after:(id)existingObject
 {
+#error head and tail to return uncached objects?
+    
     NSAssert(![existingObject isKindOfClass:[ADSCache class]], @"ADSCache are not valid objects");
 
     id existingObjectCache = [_serialisedObjectLookup objectForKey:@([existingObject hash])];
     
     [super add:anObject after:existingObjectCache?existingObjectCache:existingObject];
+    
+    [self serialiseToObject:[self objectAtDistance:-_cacheWindow fromObject:self.index]];
+    [self serialiseFromObject:[self objectAtDistance:_cacheWindow fromObject:self.index]];
 }
 
 @end
