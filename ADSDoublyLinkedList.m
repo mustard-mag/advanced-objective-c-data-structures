@@ -448,4 +448,18 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     }
 }
 
+- (id)nextObjectAfter:(id)anObject
+{
+    ADSLink *objLink = [_list objectForKey:anObject];
+    
+    return objLink.forward;
+}
+
+- (id)previousObjectBefore:(id)anObject
+{    
+    ADSLink *objLink = [_list objectForKey:anObject];
+    
+    return objLink.back;
+}
+
 @end

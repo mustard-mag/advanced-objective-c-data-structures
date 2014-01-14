@@ -77,6 +77,12 @@ extern NSString *const ADSInconsistencyException;
 ///Convenience method to return the previous object in the list and move the index back in the list. If the index is at tail this will return nil and not change index.
 - (id)previousObject;
 
+//Given anObject returns the next/forward object (or nil if anObject is the head). This does not move index.
+- (id)nextObjectAfter:(id)anObject;
+
+//Given anObject returns the previous/backward object (or nil if anObject is the tail). This does not move index.
+- (id)previousObjectBefore:(id)anObject;
+
 @end
 
 /* ADSLink */

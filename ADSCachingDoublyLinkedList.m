@@ -13,6 +13,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 @interface ADSCache : NSObject <NSCopying>
 
+@property (assign, nonatomic) NSUInteger objectHash;
 @property (copy, nonatomic) NSString *data;
 
 + (instancetype)cacheWithObject:(id<NSCoding>)anObject;
@@ -30,15 +31,25 @@ const NSInteger ADSDefaultCacheWindow = 4;
                                                error:nil];
 }
 
-+ (instancetype)cacheWithObject:(id<NSCoding>)anObject
++ (instancetype)cacheWithObject:(id<NSCoding, NSObject>)anObject
 {
     ADSCache *me = [[ADSCache alloc] init];
     
     me.data = [[NSUUID UUID] UUIDString];
+    me.objectHash = [anObject hash];
     
     if(![NSKeyedArchiver archiveRootObject:anObject toFile:[[self cachePath] stringByAppendingPathComponent:me.data]])
     {
-        NSLog(@"Failed to write cache...");
+        if([[NSFileManager defaultManager] createDirectoryAtPath:[self cachePath]
+                                     withIntermediateDirectories:YES attributes:nil
+                                                           error:nil])
+        {
+            [NSKeyedArchiver archiveRootObject:anObject toFile:[[self cachePath] stringByAppendingPathComponent:me.data]];
+        }
+        else
+        {
+            NSLog(@"Failed to write cache...");
+        }
     }
     
     return me;
@@ -60,7 +71,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
 {
     NSURL *cacheUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory inDomains:NSUserDomainMask] lastObject];
     
-    return cacheUrl.path;
+    return [cacheUrl.path stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.cached-linkedlist", [[NSBundle mainBundle] bundleIdentifier]]];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -78,6 +89,8 @@ const NSInteger ADSDefaultCacheWindow = 4;
 {
     NSInteger _cacheWindow; //number of objects to retain in memory
     __weak NSMapTable *_list;
+    
+    NSMutableDictionary *_serialisedObjectLookup;
 }
 
 - (instancetype)init
@@ -92,6 +105,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     if(self)
     {
         _cacheWindow = cacheWindow;
+        _serialisedObjectLookup = [NSMutableDictionary dictionaryWithCapacity:1];
         _list = _internal;
     }
     
@@ -280,6 +294,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
         if(cache)
         {
+            [_serialisedObjectLookup setObject:cache forKey:@(cache.objectHash)];
             [self swapObject:anObject withObject:cache];
         }
     }
@@ -298,6 +313,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
         if(theObject)
         {
             [self swapObject:cacheObject withObject:theObject];
+            [_serialisedObjectLookup removeObjectForKey:@([theObject hash])];
         }
     }
     
@@ -499,6 +515,40 @@ const NSInteger ADSDefaultCacheWindow = 4;
 //    }
     
     NSAssert(![self.index isKindOfClass:[ADSCache class]], @"Index cannot be of type ADSCache");
+}
+
+- (id)nextObjectAfter:(id)anObject
+{
+    id nextObj = [super nextObjectAfter:anObject];
+    
+    if(!nextObj)
+    {
+        nextObj = [super nextObjectAfter:[_serialisedObjectLookup objectForKey:@([anObject hash])]];
+    }
+    
+    if([nextObj isKindOfClass:[ADSCache class]])
+    {
+        nextObj = [self mutateCacheToObject:nextObj];
+    }
+    
+    return nextObj;
+}
+
+- (id)previousObjectBefore:(id)anObject
+{
+    id prevObj = [super previousObjectBefore:anObject];
+    
+    if(!prevObj)
+    {
+        prevObj = [super previousObjectBefore:[_serialisedObjectLookup objectForKey:@([anObject hash])]];
+    }
+    
+    if([prevObj isKindOfClass:[ADSCache class]])
+    {
+        prevObj = [self mutateCacheToObject:prevObj];
+    }
+    
+    return prevObj;
 }
 
 @end
