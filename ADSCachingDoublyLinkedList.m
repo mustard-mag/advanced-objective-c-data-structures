@@ -429,6 +429,13 @@ const NSInteger ADSDefaultCacheWindow = 4;
     NSAssert(![self.index isKindOfClass:[ADSCache class]], @"Index cannot be of type ADSCache");
 }
 
+- (void)empty
+{
+    [super empty];
+    
+    [_serialisedObjectLookup removeAllObjects];
+}
+
 - (void)remove
 {
     [super remove];
