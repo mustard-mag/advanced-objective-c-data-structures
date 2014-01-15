@@ -344,6 +344,9 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (void)serialiseToObject:(id)anObject //from tail
 {
+    if(!anObject)
+        return;
+    
     id currentObj = self.tail;
     
     do {
@@ -361,6 +364,9 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (void)serialiseFromObject:(id)anObject //to head
 {
+    if(!anObject)
+        return;
+    
     id currentObj = anObject;
     
     do {
@@ -386,6 +392,16 @@ const NSInteger ADSDefaultCacheWindow = 4;
     }
     
     return _head;
+}
+
+- (id)tail
+{
+    if([_tail isKindOfClass:[ADSCache class]])
+    {
+        _tail = [self mutateCacheToObject:_head];
+    }
+    
+    return _tail;
 }
 
 - (void)add:(id)anObject
