@@ -335,7 +335,10 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     if(firstLink && secondLink)
     {
         [_list removeObjectForKey:firstObject];
+        [_listContents removeObject:firstObject];
+        
         [_list removeObjectForKey:secondObject];
+        [_listContents removeObject:secondObject];
         
         { //Update the links for the newly added secondObject
             
@@ -352,6 +355,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
                 _tail = secondObject;
             
             [_list setObject:firstLink forKey:secondObject];
+            [_listContents addObject:secondObject];
         }
         
         { //Update the links for the newly added firstObject
@@ -369,11 +373,13 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
                 _tail = firstObject;
             
             [_list setObject:secondLink forKey:firstObject];
+            [_listContents addObject:firstObject];
         }
     }
     else if(firstLink) //TODO: refactor these with less code dupe.
     {
         [_list removeObjectForKey:firstObject];
+        [_listContents removeObject:firstObject];
         
         { //Update the links for the newly added secondObject
             
@@ -390,11 +396,13 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
                 _tail = secondObject;
             
             [_list setObject:firstLink forKey:secondObject];
+            [_listContents addObject:secondObject];
         }
     }
     else if(secondLink)
     {
         [_list removeObjectForKey:secondObject];
+        [_listContents removeObject:secondObject];
         
         { //Update the links for the newly added firstObject
             
@@ -411,6 +419,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
                 _tail = firstObject;
             
             [_list setObject:secondLink forKey:firstObject];
+            [_listContents addObject:firstObject];
         }
     }
     //else if(!(firstLink && secondLink)) //neither object is in list
