@@ -490,6 +490,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
         id backObject = existingLink.back;
         ADSLink *beforeLink = [_list objectForKey:backObject];
         
+        //Calling -empty can trigger this? 
         NSAssert((existingLink && beforeLink), @"List is corrupt!");
         
         existingLink.back = anObject;
