@@ -287,12 +287,13 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     if([cacheObject isKindOfClass:[ADSCache class]])
     {
+        NSUInteger hashValue = cacheObject.objectHash;
         theObject = [cacheObject object];
         
         if(theObject)
         {
             [self swapObject:cacheObject withObject:theObject];
-            [_serialisedObjectLookup removeObjectForKey:@([theObject hash])];
+            [_serialisedObjectLookup removeObjectForKey:@(hashValue)];
         }
     }
     

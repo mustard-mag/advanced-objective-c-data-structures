@@ -480,7 +480,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     
     [_listContents addObject:anObject];
     
-    if([existingObject isEqual:self.tail])
+    if([existingObject isEqual:_tail])
     {
         [self addAtTail:anObject];
     }
@@ -504,7 +504,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 {
     NSAssert(![_listContents containsObject:anObject], @"Linked lists can only contain one copy of each object");
     
-    if([existingObject isEqual:self.head])
+    if([existingObject isEqual:_head])
     {
         [self add:anObject]; //this will add object to _listContents
     }
