@@ -109,11 +109,11 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 {
     BOOL success = YES;
     
-    if(self.head && self.index && self.tail)
+    if(_head && self.index && _tail)
     {
         success = NO;
     }
-    else if(!self.head && !self.index && !self.tail)
+    else if(!_head && !self.index && !_tail)
     {
         success = YES;
     }

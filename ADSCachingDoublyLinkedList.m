@@ -121,7 +121,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     if([self isEmpty])
         return @"[   EMPTY LIST    ]";
     
-    if([self.head isEqual:self.tail])
+    if([_head isEqual:_tail])
         return @"[ ONLY ONE OBJECT ]";
     
     NSMutableString *desc = [NSMutableString stringWithFormat:@"[%@T|%lu%@]", ([self.tail isEqual:self.index]?@"*":@" "), (unsigned long)([self.tail isKindOfClass:[ADSCache class]]?[self.tail objectHash]:[self.tail hash]), ([self.tail isKindOfClass:[ADSCache class]]?@"~":@" ")];
@@ -138,7 +138,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
         
     } while (iterate.forward);
     
-    [desc appendFormat:@"[%@H|%lu%@]", ([self.head isEqual:self.index]?@"*":@" "), (unsigned long)([self.head isKindOfClass:[ADSCache class]]?[self.head objectHash]:[self.head hash]), ([self.head isKindOfClass:[ADSCache class]]?@"~":@" ")];
+    [desc appendFormat:@"[%@H|%lu%@]", ([_head isEqual:self.index]?@"*":@" "), (unsigned long)([_head isKindOfClass:[ADSCache class]]?[_head objectHash]:[_head hash]), ([_head isKindOfClass:[ADSCache class]]?@"~":@" ")];
         
     return desc;
 }
@@ -266,11 +266,6 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     ADSCache *cache = nil;
     
-    /*if([anObject isEqual:self.head] || [anObject isEqual:self.tail])
-    {
-        return anObject; //do not cach head or tail
-    }
-    else*/
     if(![anObject isKindOfClass:[ADSCache class]])
     {
         //TODO: refactor into block
@@ -281,15 +276,6 @@ const NSInteger ADSDefaultCacheWindow = 4;
             [_serialisedObjectLookup setObject:cache forKey:@(cache.objectHash)];
             [self swapObject:anObject withObject:cache]; //maintains head and tail???
         }
-        
-//        if([anObject isEqual:_tail])
-//        {
-//            _tail = cache;
-//        }
-//        else if ([anObject isEqual:_head])
-//        {
-//            _head = cache;
-//        }
     }
     
     return cache;
@@ -392,6 +378,16 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 #pragma mark - Overridden
 
+- (id)head
+{
+    if([_head isKindOfClass:[ADSCache class]])
+    {
+        _head = [self mutateCacheToObject:_head];
+    }
+    
+    return _head;
+}
+
 - (void)add:(id)anObject
 {
     NSAssert([anObject conformsToProtocol:@protocol(NSCoding)], @"Object cannot be cached, in production code this will be ignored.");
@@ -429,7 +425,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     //Hop backwards _cacheWindow times and cache objects if required
     id backObj = [self objectAtDistance:-(_cacheWindow + 1) fromObject:self.index];
-    BOOL loopBack = ![self.index isEqual:self.tail]; //only try and cache backwards if we're not the tail
+    BOOL loopBack = ![self.index isEqual:_tail]; //only try and cache backwards if we're not the tail
     
     while(backObj && loopBack)
     {
@@ -447,7 +443,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     //Hop forward _cacheWindow times and un-cache objects if required
     id forwardObj = [self objectAtDistance:_cacheWindow fromObject:self.index];
-    BOOL loopForward = ![self.index isEqual:self.head]; //only try and cache forwards if we're not the head
+    BOOL loopForward = ![self.index isEqual:_head]; //only try and cache forwards if we're not the head
     
     while(loopForward && forwardObj)
     {
@@ -472,7 +468,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     //Hop backwards _cacheWindow times and cache objects if required
     id forwardObj = [self objectAtDistance:_cacheWindow+1 fromObject:self.index];
-    BOOL loopForward = ![self.index isEqual:self.head]; //only try and cache forwards if we're not the head
+    BOOL loopForward = ![self.index isEqual:_head]; //only try and cache forwards if we're not the head
     
     while(loopForward && forwardObj)
     {
@@ -490,7 +486,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     //Hop backwards _cacheWindow times and cache objects if required
     id backObj = [self objectAtDistance:-_cacheWindow fromObject:self.index];
-    BOOL loopBack = ![self.index isEqual:self.tail]; //only try and cache backwards if we're not the tail
+    BOOL loopBack = ![self.index isEqual:_tail]; //only try and cache backwards if we're not the tail
     
     while(backObj && loopBack)
     {
@@ -557,7 +553,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (void)add:(id)anObject after:(id)existingObject
 {
-#error head and tail to return uncached objects?
+//#error head and tail to return uncached objects?
     
     NSAssert(![existingObject isKindOfClass:[ADSCache class]], @"ADSCache are not valid objects");
 
