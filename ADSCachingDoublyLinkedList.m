@@ -388,6 +388,46 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 #pragma mark - Overridden
 
+- (void)trimBackward
+{
+    ADSLink *currentLink = [_list objectForKey:self.index];
+    ADSCache *currentObject = currentLink.back;
+    
+    do
+    {
+        if([currentObject isKindOfClass:[ADSCache class]])
+        {
+            [_serialisedObjectLookup removeObjectForKey:@(currentObject.objectHash)];
+        }
+        
+        currentLink = [_list objectForKey:currentObject];
+        currentObject = currentLink.back;
+        
+    } while(currentObject);
+    
+    [super trimBackward];
+}
+
+- (void)trimForward
+{
+    ADSLink *currentLink = [_list objectForKey:self.index];
+    ADSCache *currentObject = currentLink.forward;
+    
+    do
+    {
+        if([currentObject isKindOfClass:[ADSCache class]])
+        {
+            [_serialisedObjectLookup removeObjectForKey:@(currentObject.objectHash)];
+        }
+        
+        currentLink = [_list objectForKey:currentObject];
+        currentObject = currentLink.forward;
+        
+    } while(currentObject);
+    
+    [super trimForward];
+}
+
 - (id)head
 {
     if([_head isKindOfClass:[ADSCache class]])
