@@ -6,6 +6,10 @@
 //  Copyright (c) 2014 Empirical Magic Ltd. All rights reserved.
 //
 
+/*
+ - Memory warnings?
+ */
+
 #import "ADSDoublyLinkedList.h"
 
 @interface ADSCachingDoublyLinkedList : ADSDoublyLinkedList

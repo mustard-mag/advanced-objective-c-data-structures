@@ -350,7 +350,10 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     id currentObj = self.tail;
     
-    do {
+    do
+    {
+        if(!currentObj)
+            break; //we hit the head?
         
         if(![currentObj isKindOfClass:[ADSCache class]])
         {
@@ -370,8 +373,8 @@ const NSInteger ADSDefaultCacheWindow = 4;
     
     id currentObj = anObject;
     
-    do {
-        
+    do
+    {
         if(![currentObj isKindOfClass:[ADSCache class]])
         {
             currentObj = [self mutateObjectToCache:currentObj];
@@ -427,6 +430,13 @@ const NSInteger ADSDefaultCacheWindow = 4;
     }
     
     NSAssert(![self.index isKindOfClass:[ADSCache class]], @"Index cannot be of type ADSCache");
+}
+
+- (void)empty
+{
+    [super empty];
+    
+    [_serialisedObjectLookup removeAllObjects];
 }
 
 - (void)remove

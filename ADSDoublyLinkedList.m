@@ -475,21 +475,22 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 {
     NSAssert(![_listContents containsObject:anObject], @"Linked lists can only contain one copy of each object");
     
-    if([_listContents containsObject:anObject])
-        return;
-    
-    [_listContents addObject:anObject];
-    
     if([existingObject isEqual:_tail])
     {
         [self addAtTail:anObject];
     }
     else
     {
+        if([_listContents containsObject:anObject])
+            return;
+        
+        [_listContents addObject:anObject];
+        
         ADSLink *existingLink = [_list objectForKey:existingObject];
         id backObject = existingLink.back;
         ADSLink *beforeLink = [_list objectForKey:backObject];
         
+        //Calling -empty can trigger this? 
         NSAssert((existingLink && beforeLink), @"List is corrupt!");
         
         existingLink.back = anObject;
