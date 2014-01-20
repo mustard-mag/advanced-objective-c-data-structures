@@ -309,7 +309,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
     id returnObj = nil;
     ADSLink *currentLink = [_list objectForKey:startObject];
     
-    for(NSInteger i = 0; i < (NSInteger)abs(distance); i++)
+    for(NSInteger i = 0; i < (NSInteger)labs(distance); i++)
     {
         if(distance > 0) //fwd
         {
