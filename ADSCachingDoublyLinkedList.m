@@ -95,6 +95,14 @@ const NSInteger ADSDefaultCacheWindow = 4;
     NSMutableDictionary *_serialisedObjectLookup;
 }
 
+- (void)dealloc
+{
+    _list = nil;
+    
+    [_serialisedObjectLookup removeAllObjects];
+    _serialisedObjectLookup = nil;
+}
+
 - (instancetype)init
 {
     return [self initWithCacheWindow:ADSDefaultCacheWindow];
@@ -269,10 +277,13 @@ const NSInteger ADSDefaultCacheWindow = 4;
     if(![anObject isKindOfClass:[ADSCache class]])
     {
         //TODO: refactor into block
+        __unused NSUInteger hashValue = [anObject hash];
         cache = [ADSCache cacheWithObject:anObject];
 
         if(cache)
         {
+            NSAssert(cache.objectHash == hashValue, @"Mutated object has does not match original.");
+            
             [_serialisedObjectLookup setObject:cache forKey:@(cache.objectHash)];
             [self swapObject:anObject withObject:cache]; //maintains head and tail???
         }
@@ -450,7 +461,11 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (void)add:(id)anObject
 {
+//#if !defined(NS_BLOCK_ASSERTIONS)
     NSAssert([anObject conformsToProtocol:@protocol(NSCoding)], @"Object cannot be cached, in production code this will be ignored.");
+    NSAssert(![[_serialisedObjectLookup allKeys] containsObject:@([anObject hash])], @"Linked lists can only contain one copy of each object: %@", @([anObject hash]));
+    
+//#endif //NS_BLOCK_ASSERTIONS
     
     if([anObject conformsToProtocol:@protocol(NSCoding)])
     {
@@ -620,8 +635,6 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (void)add:(id)anObject after:(id)existingObject
 {
-//#error head and tail to return uncached objects?
-    
     NSAssert(![existingObject isKindOfClass:[ADSCache class]], @"ADSCache are not valid objects");
 
     id existingObjectCache = [_serialisedObjectLookup objectForKey:@([existingObject hash])];
