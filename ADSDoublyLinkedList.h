@@ -18,6 +18,9 @@ extern NSString *const ADSInconsistencyException;
     id _tail;
 }
 
+///Name for the list, used in debug output, queues, etc.
+@property (copy, nonatomic) NSString *listName;
+
 /* Access Nodes */
 
 ///Object at the very base of the list
