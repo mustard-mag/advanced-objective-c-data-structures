@@ -20,7 +20,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
 
 - (void)dealloc
 {
-    NSLog(@"Link is being removed...");
+    //NSLog(@"Link is being removed...");
     
     self.forward = nil;
     self.back = nil;
@@ -58,7 +58,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     [_listContents removeAllObjects];
     _listContents = nil;
     
-    NSLog(@"BUY, BUY!");
+    //NSLog(@"BUY, BUY!");
 }
 
 - (instancetype)init
@@ -226,7 +226,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
         _index = indexLink.forward;
     }
     
-    NSLog(@"REMOVING: %p", nodeToRemove);
+    //NSLog(@"REMOVING: %p", nodeToRemove);
     [_listContents removeObject:nodeToRemove];
     [_list removeObjectForKey:nodeToRemove];
 }
@@ -244,7 +244,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     {
         ADSLink *objLink = [_list objectForKey:trimFromObject];
         
-        NSLog(@"REMOVING: %p", trimFromObject);
+        //NSLog(@"REMOVING: %p", trimFromObject);
         [_listContents removeObject:trimFromObject];
         [_list removeObjectForKey:trimFromObject];
         
@@ -268,7 +268,7 @@ NSString *const ADSInconsistencyException = @"com.ads.exception.inconsistency";
     {
         ADSLink *objLink = [_list objectForKey:trimFromObject];
         
-        NSLog(@"REMOVING: %p", trimFromObject);
+        //NSLog(@"REMOVING: %p", trimFromObject);
         [_listContents removeObject:trimFromObject];
         [_list removeObjectForKey:trimFromObject];
         

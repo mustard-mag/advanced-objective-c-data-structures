@@ -25,7 +25,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
 
 - (void)dealloc
 {
-    NSLog(@"Deleating cache file: %@", self.data);
+    //NSLog(@"Deleating cache file: %@", self.data);
     
     [[NSFileManager defaultManager] removeItemAtPath:[[ADSCache cachePath] stringByAppendingPathComponent:self.data]
                                                error:nil];
@@ -50,7 +50,7 @@ const NSInteger ADSDefaultCacheWindow = 4;
         }
         else
         {
-            NSLog(@"Failed to write cache...");
+            //NSLog(@"Failed to write cache...");
         }
     }
     
@@ -475,13 +475,13 @@ const NSInteger ADSDefaultCacheWindow = 4;
         
         if([self distanceFromObject:self.index toObject:anObject] > _cacheWindow)
         {
-            //NSLog(@"*** Distance %d ***", );
+            ////NSLog(@"*** Distance %d ***", );
             [self mutateObjectToCache:anObject];
         }
     }
     else
     {
-        NSLog(@"[ERROR: %s] Object not added to list.", __PRETTY_FUNCTION__);
+        //NSLog(@"[ERROR: %s] Object not added to list.", __PRETTY_FUNCTION__);
     }
     
     NSAssert(![self.index isKindOfClass:[ADSCache class]], @"Index cannot be of type ADSCache");
